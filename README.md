@@ -14,7 +14,7 @@
 2. Place at /user/homefolder, for eg my cephuser is bydefault set to root, so i have placed at /root/
 3. chmod +x rgwallhost.py
 4. to pre-check if everything is working fine. 
-  4.1 python3 rgwallhost.py
+4.1 python3 rgwallhost.py
 5. After above command gets executed, check a new file is created with current date. ls , eg - 13-08-2020
 
 ### Observation
