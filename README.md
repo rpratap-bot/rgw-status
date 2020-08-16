@@ -15,8 +15,8 @@
 3. chmod +x rgwallhost.py
 4. python3 rgwallhost.py // to pre-check everything runs fine
 5. After above command gets executed, check a new file is created with current date. ls , eg - 13-08-2020
-7. cronatb -e //set for the cronjob for every 1 min
-8. x x x x x /usr/bin/python3 /root/rgwallhost.py
+7. cronatb -e //set for the cronjob for every 5 min
+8. x/5 x x x x /usr/bin/python3 /root/rgwallhost.py
 
 ### Observation
-1. Output file contains the status timestamp of the rgw daemons
+1. Output file contains the status rgw-node-name timestamp of the rgw daemons
