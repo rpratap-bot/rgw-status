@@ -1,6 +1,13 @@
 #!/usr/bin/python3
 import subprocess
+import logging
 from datetime import datetime
+
+dateTimeObj = datetime.now()
+log_name = dateTimeObj.strftime("%d-%m-%Y")
+
+logging.basicConfig(format='%(asctime)s :: %(message)s', level=logging.INFO,
+                    filename=log_name+'.log', filemode='a')
 
 
 def rgwhostlist():
@@ -20,7 +27,7 @@ def rgwhostlist():
 
 def rgwall(cmd):
     host_list = rgwhostlist()
-    print('All {} status: '.format(cmd))
+    print('Showing Current: {} status: '.format(cmd))
     for rgwhost in host_list:
         cmd_stat = "systemctl {} ceph-radosgw@rgw.{}.rgw0.service".format(cmd, rgwhost)
         check_stat = subprocess.Popen(["ssh", rgwhost,  cmd_stat], stdout=subprocess.PIPE)
@@ -29,13 +36,7 @@ def rgwall(cmd):
             stat_val = stat.decode('utf-8').strip()
             print(stat_val)
             print(rgwhost)
-            # check for the current time stamp
-            datetimeobj = datetime.now()
-            print(datetimeobj)
-            # create a file if not there, otherwise append it
-            file_name = datetimeobj.strftime("%d-%m-%Y")
-            with open(file_name, 'a') as status:
-                print(stat_val, rgwhost, datetimeobj, file=status)
+            logging.info("status: {} :: Hostaname: {}".format(stat_val, rgwhost))
 
 
 def rgwallisactive():
