@@ -28,14 +28,17 @@ def rgwhostlist():
 
 def rgwall(cmd):
     host_list = rgwhostlist()
+    # this is being used foe custom_log
     len_host_list = str(len(host_list))
+    # set to 40 for tail the current minute and the previous min data
+    len_host_list1 = "40"
     daily_log = '/var/log/{}.log'.format(log_name)
     print('Showing Current: {} status: '.format(cmd))
     for rgwhost in host_list:
         rgw_log = '/var/log/ceph/ceph-rgw-{}.rgw0.log'.format(rgwhost)
         cmd_stat = "systemctl {} ceph-radosgw@rgw.{}.rgw0.service".format(cmd, rgwhost)
-        cmd_stat_rgw = "tail -n {} {}".format(len_host_list, rgw_log)
-        # rgw_op_stat = rgwalldate(rgw_log, len_host_list, rgwhost="." )
+        cmd_stat_rgw = "tail -n {} {}".format(len_host_list1, rgw_log)
+        # rgw_op_stat = rgwalldate(rgw_log, len_host_list1, rgwhost="." )
         check_stat = subprocess.Popen(["ssh", rgwhost,  cmd_stat], stdout=subprocess.PIPE)
         check_stat_val = check_stat.stdout
         for stat in check_stat_val:
@@ -57,7 +60,7 @@ def rgwall(cmd):
             log_list.append(dates_val.split(" "))
         # combining the list within list to a single list
         res = list(itertools.chain.from_iterable(log_list))
-        print(res)
+        # print(res)
         # matching the dates from rgw_log and custom_log
         single_date = listtoset([i for i in res if i.startswith(log_name)])
         print(single_date)
