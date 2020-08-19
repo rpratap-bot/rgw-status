@@ -49,7 +49,7 @@ def rgwall(cmd):
         # check the log time of the current node, matching the hostname
         log_time = rgwcurrentlog(daily_log, len_host_list, rgwhost)
         print(log_time)
-        # tail -n 3 rgw_log_file on each node
+        # tail -n 40 rgw_log_file on each node
         date_stat = subprocess.Popen(["ssh", rgwhost, cmd_stat_rgw], stdout=subprocess.PIPE)
         date_stat_val = date_stat.stdout
         log_list = []
@@ -74,9 +74,11 @@ def rgwall(cmd):
         print(single_http_stat)
         # if all 3 are present, node is in working mode else in ideal state
         if single_date and single_time and single_http_stat:
-            print("working")
+            Status = "Working"
+            logging.info("JobStatus: {} :: Hostname: {}".format(Status, rgwhost))
         else:
-            print("sleeping")
+            Status = "Sleeping"
+            logging.info("JobStatus: {} :: Hostname: {}".format(Status, rgwhost))
         star()
 
 
