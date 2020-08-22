@@ -2,6 +2,8 @@
 import subprocess
 import logging
 import itertools
+import configparser
+config = configparser.ConfigParser()
 from datetime import datetime
 
 dateTimeObj = datetime.now()
@@ -12,45 +14,48 @@ logging.basicConfig(format='%(asctime)s :: %(message)s', level=logging.INFO,
 
 
 def rgwhostlist():
-    # cat /etc/ceph/ceph.conf | grep ^host | awk '{print $3}' - below cmds works as this one
     file_name = '/etc/ceph/ceph.conf'
-    cat_file = subprocess.Popen(['cat', file_name], stdout=subprocess.PIPE, )
-    grep_file = subprocess.Popen(['grep', '^host'], stdin=cat_file.stdout, stdout=subprocess.PIPE, )
-    awk_val = '{print$3}'
-    awk_file = subprocess.Popen(['awk', awk_val], stdin=grep_file.stdout, stdout=subprocess.PIPE)
-    end_of_pipe = awk_file.stdout
-    # capture the hostname in the list, later can be used for ssh
+    config.read(file_name)
+    all_instances_list = config.sections()
+    list_instance_without_global = []
+    for i in all_instances_list:
+        if i.startswith('client'):
+            split_each_instance = i.split('.')
+            list_instance_without_global.append(split_each_instance[2:])
     rgw_host_list = []
-    for rgwhost in end_of_pipe:
-        rgw_host_list.append(rgwhost.decode('utf-8').strip())
+    for i in list_instance_without_global:
+        combine_instance_part = ".".join(i)
+        rgw_host_list.append(combine_instance_part)
     return rgw_host_list
 
 
 def rgwall(cmd):
     host_list = rgwhostlist()
-    # this is being used foe custom_log
+    # this is being used for custom_log
     len_host_list = str(len(host_list))
     # set to 40 for tail the current minute and the previous min data
-    len_host_list1 = "40"
+    len_host_list1 = "120"
     daily_log = '/var/log/{}.log'.format(log_name)
     print('Showing Current: {} status: '.format(cmd))
     for rgwhost in host_list:
-        rgw_log = '/var/log/ceph/ceph-rgw-{}.rgw0.log'.format(rgwhost)
-        cmd_stat = "systemctl {} ceph-radosgw@rgw.{}.rgw0.service".format(cmd, rgwhost)
-        cmd_stat_rgw = "tail -n {} {}".format(len_host_list1, rgw_log)
-        # rgw_op_stat = rgwalldate(rgw_log, len_host_list1, rgwhost="." )
-        check_stat = subprocess.Popen(["ssh", rgwhost,  cmd_stat], stdout=subprocess.PIPE)
+        cmd_stat = "systemctl {} ceph-radosgw@rgw.{}.service".format(cmd, rgwhost)
+        check_stat = subprocess.Popen(["ssh", rgwhost[:-5],  cmd_stat], stdout=subprocess.PIPE)
         check_stat_val = check_stat.stdout
         for stat in check_stat_val:
             stat_val = stat.decode('utf-8').strip()
             print(stat_val)
             print(rgwhost)
             logging.info("status: {} :: Hostaname: {}".format(stat_val, rgwhost))
-        # check the log time of the current node, matching the hostname
+    star()
+    # check the log time of the current node, matching the hostname
+    for rgwhost in host_list:
+        rgw_log = '/var/log/ceph/ceph-rgw-{}.log'.format(rgwhost)
+        cmd_stat_rgw = "tail -n {} {}".format(len_host_list1, rgw_log)
+        # getting the log-time one by one from custom-log
         log_time = rgwcurrentlog(daily_log, len_host_list, rgwhost)
-        print(log_time)
-        # tail -n 40 rgw_log_file on each node
-        date_stat = subprocess.Popen(["ssh", rgwhost, cmd_stat_rgw], stdout=subprocess.PIPE)
+        print(log_time) # prints logtime of each instance
+        # tail -n 40 /var/log/ceph/ceph-rgw-{}.log on each node (rgwhhost)
+        date_stat = subprocess.Popen(["ssh", rgwhost[:-5], cmd_stat_rgw], stdout=subprocess.PIPE)
         date_stat_val = date_stat.stdout
         log_list = []
         for dates in date_stat_val:
@@ -65,8 +70,7 @@ def rgwall(cmd):
         single_date = listtoset([i for i in res if i.startswith(log_name)])
         print(single_date)
         # matching the times from rgw_log and custom_log
-        # need to configure this part for s3cmd rb
-        # need to check something regarding radosgw-admin
+        # need to configure this part for s3cmd rb & radosgw-admin cmds
         single_time = listtoset([i for i in res if i.startswith(log_time)])
         print(single_time)
         # checking whether http_status is also present in the list, for further confirmation
