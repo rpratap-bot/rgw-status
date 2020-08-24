@@ -33,8 +33,8 @@ def rgwall(cmd):
     host_list = rgwhostlist()
     # this is being used for custom_log
     len_host_list = str(len(host_list))
-    # set to 40 for tail the current minute and the previous min data
-    len_host_list1 = "120"
+    # set to 150 for tail the current minute and the previous min data
+    len_host_list1 = "150"
     daily_log = '/var/log/{}.log'.format(log_name)
     print('Showing Current: {} status: '.format(cmd))
     for rgwhost in host_list:
