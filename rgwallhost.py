@@ -3,8 +3,9 @@ import subprocess
 import logging
 import itertools
 import configparser
-config = configparser.ConfigParser()
 from datetime import datetime
+
+config = configparser.ConfigParser()
 
 dateTimeObj = datetime.now()
 log_name = dateTimeObj.strftime("%Y-%m-%d")
@@ -19,7 +20,7 @@ def rgwhostlist():
     all_instances_list = config.sections()
     list_instance_without_global = []
     for i in all_instances_list:
-        if i.startswith('client'):
+        if i.startswith('client.rgw'):
             split_each_instance = i.split('.')
             list_instance_without_global.append(split_each_instance[2:])
     rgw_host_list = []
@@ -39,7 +40,7 @@ def rgwall(cmd):
     print('Showing Current: {} status: '.format(cmd))
     for rgwhost in host_list:
         cmd_stat = "systemctl {} ceph-radosgw@rgw.{}.service".format(cmd, rgwhost)
-        check_stat = subprocess.Popen(["ssh", rgwhost[:-5],  cmd_stat], stdout=subprocess.PIPE)
+        check_stat = subprocess.Popen(["sudo", "ssh", rgwhost[:-5],  cmd_stat], stdout=subprocess.PIPE)
         check_stat_val = check_stat.stdout
         for stat in check_stat_val:
             stat_val = stat.decode('utf-8').strip()
@@ -53,9 +54,10 @@ def rgwall(cmd):
         cmd_stat_rgw = "tail -n {} {}".format(len_host_list1, rgw_log)
         # getting the log-time one by one from custom-log
         log_time = rgwcurrentlog(daily_log, len_host_list, rgwhost)
-        print(log_time) # prints logtime of each instance
+        # prints logtime of each instance
+        print(log_time)
         # tail -n 40 /var/log/ceph/ceph-rgw-{}.log on each node (rgwhhost)
-        date_stat = subprocess.Popen(["ssh", rgwhost[:-5], cmd_stat_rgw], stdout=subprocess.PIPE)
+        date_stat = subprocess.Popen(["sudo", "ssh", rgwhost[:-5], cmd_stat_rgw], stdout=subprocess.PIPE)
         date_stat_val = date_stat.stdout
         log_list = []
         for dates in date_stat_val:
@@ -78,18 +80,19 @@ def rgwall(cmd):
         print(single_http_stat)
         # if all 3 are present, node is in working mode else in ideal state
         if single_date and single_time and single_http_stat:
-            Status = "Working"
-            logging.info("JobStatus: {} :: Hostname: {}".format(Status, rgwhost))
+            status = "Working"
+            logging.info("JobStatus: {} :: Hostname: {}".format(status, rgwhost))
         else:
-            Status = "Sleeping"
-            logging.info("JobStatus: {} :: Hostname: {}".format(Status, rgwhost))
+            status = "Sleeping"
+            logging.info("JobStatus: {} :: Hostname: {}".format(status, rgwhost))
         star()
 
 
 def rgwcurrentlog(filename, len_host_list, rgwhost):
-    # tail -n len_host_list | grep rgwhost | awk '{print$2}'
+    # sudo tail -n len_host_list | grep rgwhost | awk '{print$2}'
+    # prints logtime of each instance
     awk_val = '{print$2}'
-    tail_file = subprocess.Popen(['tail', '-n', len_host_list, filename], stdout=subprocess.PIPE, )
+    tail_file = subprocess.Popen(['sudo', 'tail', '-n', len_host_list, filename], stdout=subprocess.PIPE, )
     grep_date = subprocess.Popen(['grep', rgwhost], stdin=tail_file.stdout, stdout=subprocess.PIPE, )
     awk_file = subprocess.Popen(['awk', awk_val], stdin=grep_date.stdout, stdout=subprocess.PIPE)
     # print(awk_file) # <subprocess.Popen object at 0x7f7d357f9470>
