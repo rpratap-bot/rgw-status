@@ -14,7 +14,7 @@
 2. Place at /user/homefolder, for eg my cephuser is bydefault set to root, so i have placed at /root/
 3. chmod +x rgwallhost.py
 4. python3 rgwallhost.py // to pre-check everything runs fine
-5. After above command gets executed, check a new file is created with current date. ls , eg - 13-08-2020
+5. After above command gets executed, check a new log file is created with current date in -  /var/log/2020-09-01.log
 7. cronatb -e //set for the cronjob for every 5 min
 8. x/5 x x x x /usr/bin/python3 /root/rgwallhost.py
 
