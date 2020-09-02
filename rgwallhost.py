@@ -15,7 +15,7 @@ logging.basicConfig(format='%(asctime)s :: %(message)s', level=logging.INFO,
 
 
 def host_check():
-    command = subprocess.run(['sudo', 'ansible', 'rgws', '--list-host', '-i', '/usr/share/ceph-ansible/hosts'],
+    command = subprocess.run(['sudo', 'ansible', 'rgws', '--list-host', ],
                              stdout=subprocess.PIPE, )
     host_output = command.stdout.decode('utf-8').splitlines()
     host_list = []
@@ -25,7 +25,7 @@ def host_check():
     if rgw_host_list:
         return rgw_host_list
     else:
-        command = subprocess.run(['sudo', 'ansible', 'rgws', '--list-host'], stdout=subprocess.PIPE, )
+        command = subprocess.run(['sudo', 'ansible', 'rgws', '--list-host', '-i', '/usr/share/ceph-ansible/hosts'], stdout=subprocess.PIPE, )
         host_output = command.stdout.decode('utf-8').splitlines()
         host_list = []
         for host_val in host_output:
