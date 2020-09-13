@@ -20,3 +20,7 @@
 ### Observation
 1. Output file contains the ssh status :: rgw-node-name ::  timestamp of the rgw daemons
 2. Output file contains the job status :: rgw-instance-name ::  timestamp of the rgw daemons
+
+### Work-Around
+1. If the script fails foe --list-host option , try to interchange the line 18 with line 28 and re run the script.
+2. Trying to fihure out this issue for magna and rhos d vms, will update in few days, for now this is the work around.
