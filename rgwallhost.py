@@ -15,8 +15,7 @@ logging.basicConfig(format='%(asctime)s :: %(message)s', level=logging.INFO,
 
 
 def host_check():
-    command = subprocess.run(['sudo', 'ansible', 'rgws', '--list-host', ],
-                             stdout=subprocess.PIPE, )
+    command = subprocess.run(['sudo', 'ansible', 'rgws', '--list-host', ], stdout=subprocess.PIPE, )
     host_output = command.stdout.decode('utf-8').splitlines()
     host_list = []
     for host_val in host_output:
@@ -30,6 +29,7 @@ def host_check():
         host_list = []
         for host_val in host_output:
             host_list.append(host_val.strip(' '))
+        rgw_host_list = host_list[1:]
         return rgw_host_list
 
 
@@ -51,8 +51,9 @@ def rgwall(cmd):
     else:
         rgw_inst_cf = 1
     rgw_inst_cf = int(rgw_inst_cf)
+
     for i in range(rgw_inst_cf):
-        print(i)
+        print("Count of rgw_num_instances {}".format(i))
 
     for rgw_host in host_list:
         hostget_1 = subprocess.run(['ssh', rgw_host, 'hostname'], stdout=subprocess.PIPE, )
