@@ -60,7 +60,7 @@ def rgwall(cmd):
         host_list = []
         log_list = []
         count = 0
-        # take back the value from the hostandlog.py and separate that to two different list
+        # take back the value from the hostandlog.py and separate that to two different list file
         # 1st list = hostname and 2nd list = log file name
         for line in stdout:
             # Process each line in the remote output
