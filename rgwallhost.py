@@ -14,8 +14,8 @@ log_name = dateTimeObj.strftime("%Y-%m-%d")
 logging.basicConfig(format='%(asctime)s :: %(message)s', level=logging.INFO,
                     filename=log_name+'.log', filemode='a', datefmt='%Y-%m-%d %H:%M:%S')
 # change the username and password as the machine
-username = "root"
-password = "redhat"
+username = "cephuser"
+password = "cephuser"
 
 # check for the numbers of rgw hosts from the ansible node
 def host_check():
@@ -44,6 +44,7 @@ def rgwall(cmd):
     len_host_list1 = "150"
     daily_log = '{}.log'.format(log_name)
     # ssh to particular host one by one and check the status and job
+    logging.getLogger("paramiko").setLevel(logging.WARNING)
     for rgw_host in host_list:
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
