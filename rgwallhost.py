@@ -16,9 +16,8 @@ logging.basicConfig(format='%(asctime)s :: %(message)s', level=logging.INFO,
                     filename=log_name+'.log', filemode='a', datefmt='%Y-%m-%d %H:%M:%S')
 
 
-
-# username = "uname_ansible_user"
-# password = "password_anisble_user"
+# username="uname_ansible_user"
+# password="password_ansible_user"
 
 # check for the numbers of rgw hosts from the ansible node
 def host_check():
@@ -31,7 +30,8 @@ def host_check():
     if rgw_host_list:
         return rgw_host_list
     else:
-        command = subprocess.run(['sudo', 'ansible', 'rgws', '--list-host', '-i', '/usr/share/ceph-ansible/hosts'], stdout=subprocess.PIPE, )
+        command = subprocess.run(['sudo', 'ansible', 'rgws', '--list-host', '-i', '/usr/share/ceph-ansible/hosts'],
+                                 stdout=subprocess.PIPE, )
         host_output = command.stdout.decode('utf-8').splitlines()
         host_list = []
         for host_val in host_output:
@@ -148,16 +148,17 @@ def rgwallisactive():
 
 def rgwallisenabled():
     cmd = 'is-enabled'
-    rgwall(cmd)
+    rgwall(cmd, mainparser().username, mainparser().password)
 
 
 def rgwallstatus():
     cmd = 'status'
-    rgwall(cmd)
+    rgwall(cmd, mainparser().username, mainparser().password)
 
 
 def star():
     print("*" * 40)
+
 
 def mainparser():
     # create a parser var
@@ -169,6 +170,6 @@ def mainparser():
     args = parser.parse_args()
     return args
 
+
 if __name__ == '__main__':
     rgwallisactive()
-
