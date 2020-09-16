@@ -4,6 +4,7 @@ import logging
 import itertools
 import configparser
 import paramiko
+import argparse
 from datetime import datetime
 
 config = configparser.ConfigParser()
@@ -13,9 +14,11 @@ log_name = dateTimeObj.strftime("%Y-%m-%d")
 
 logging.basicConfig(format='%(asctime)s :: %(message)s', level=logging.INFO,
                     filename=log_name+'.log', filemode='a', datefmt='%Y-%m-%d %H:%M:%S')
-# change the username and password as the machine
-username = "root"
-password = "redhat"
+
+
+
+# username = "uname_ansible_user"
+# password = "password_anisble_user"
 
 # check for the numbers of rgw hosts from the ansible node
 def host_check():
@@ -37,14 +40,19 @@ def host_check():
         return rgw_host_list
 
 
-def rgwall(cmd):
+def rgwall(cmd, username, password):
     host_list = host_check()
     print(host_list)
     len_host_list = '1'
     len_host_list1 = "150"
     daily_log = '{}.log'.format(log_name)
     # ssh to particular host one by one and check the status and job
+    logging.getLogger("paramiko").setLevel(logging.WARNING)
     for rgw_host in host_list:
+        # the conversion of id_rsa key to be used by paramiko can be done by puttygen
+        # so better to use parser rather than conversion
+        # privatekeyfile = os.path.expanduser('~/.ssh/id_rsa')
+        # mykey = paramiko.RSAKey.from_private_key_file('/home/cephuser/.ssh/id_rsa')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
@@ -60,7 +68,7 @@ def rgwall(cmd):
         host_list = []
         log_list = []
         count = 0
-        # take back the value from the hostandlog.py and separate that to two different list
+        # take back the value from the hostandlog.py and separate that to two different list file
         # 1st list = hostname and 2nd list = log file name
         for line in stdout:
             # Process each line in the remote output
@@ -77,7 +85,7 @@ def rgwall(cmd):
 
         for i in range(total_rgw_instance):
             # check rgw status and hostname and log that in log file
-            cmd_stat = "sudo systemctl is-active ceph-radosgw@rgw.{}.rgw{}.service".format(host_list[0], i)
+            cmd_stat = "sudo systemctl {} ceph-radosgw@rgw.{}.rgw{}.service".format(cmd, host_list[0], i)
             check_stat = subprocess.run(['ssh', rgw_host, cmd_stat], stdout=subprocess.PIPE, )
             check_stat_val = check_stat.stdout.decode('utf-8').strip('\n')
             print(host_list[0]+".rgw"+str(i)+".service"+": "+check_stat_val)
@@ -135,7 +143,7 @@ def listtoset(list_input):
 
 def rgwallisactive():
     cmd = 'is-active'
-    rgwall(cmd)
+    rgwall(cmd, mainparser().username, mainparser().password)
 
 
 def rgwallisenabled():
@@ -151,6 +159,16 @@ def rgwallstatus():
 def star():
     print("*" * 40)
 
+def mainparser():
+    # create a parser var
+    parser = argparse.ArgumentParser(description='Pass the username and password for paramiko, e.g python3 rgwallhost.py username passowrd')
+    # going to have only positional arguments
+    parser.add_argument("username", help="Passing ansible username for the ssh_connection")
+    parser.add_argument("password", help="Passing ansible password for the ssh_connection")
+    # grab the arguments from the command line
+    args = parser.parse_args()
+    return args
 
 if __name__ == '__main__':
     rgwallisactive()
+
