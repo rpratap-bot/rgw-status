@@ -7,6 +7,8 @@
 ### Pre-requisite
 1. The script must be run with the ansible_user from the installer node from where the cluster is deployed.
 2. Python3.6 and greater
+3. Running Ceph Cluster with one or more than one rgw nodes.
+4. Currently being tested on the bare-metal setup.
 
 ### To do
 1. git clone the repo.
