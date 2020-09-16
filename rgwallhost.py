@@ -4,6 +4,7 @@ import logging
 import itertools
 import configparser
 import paramiko
+import argparse
 from datetime import datetime
 
 config = configparser.ConfigParser()
@@ -13,9 +14,11 @@ log_name = dateTimeObj.strftime("%Y-%m-%d")
 
 logging.basicConfig(format='%(asctime)s :: %(message)s', level=logging.INFO,
                     filename=log_name+'.log', filemode='a', datefmt='%Y-%m-%d %H:%M:%S')
-# change the username and password as the machine
-username = "cephuser"
-password = "cephuser"
+
+
+
+# username = "uname_ansible_user"
+# password = "password_anisble_user"
 
 # check for the numbers of rgw hosts from the ansible node
 def host_check():
@@ -37,7 +40,7 @@ def host_check():
         return rgw_host_list
 
 
-def rgwall(cmd):
+def rgwall(cmd, username, password):
     host_list = host_check()
     print(host_list)
     len_host_list = '1'
@@ -46,6 +49,10 @@ def rgwall(cmd):
     # ssh to particular host one by one and check the status and job
     logging.getLogger("paramiko").setLevel(logging.WARNING)
     for rgw_host in host_list:
+        # the conversion of id_rsa key to be used by paramiko can be done by puttygen
+        # so better to use parser rather than conversion
+        # privatekeyfile = os.path.expanduser('~/.ssh/id_rsa')
+        # mykey = paramiko.RSAKey.from_private_key_file('/home/cephuser/.ssh/id_rsa')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
@@ -136,7 +143,7 @@ def listtoset(list_input):
 
 def rgwallisactive():
     cmd = 'is-active'
-    rgwall(cmd)
+    rgwall(cmd, mainparser().username, mainparser().password)
 
 
 def rgwallisenabled():
@@ -152,6 +159,16 @@ def rgwallstatus():
 def star():
     print("*" * 40)
 
+def mainparser():
+    # create a parser var
+    parser = argparse.ArgumentParser(description='Pass the username and password for paramiko, e.g python3 rgwallhost.py username passowrd')
+    # going to have only positional arguments
+    parser.add_argument("username", help="Passing ansible username for the ssh_connection")
+    parser.add_argument("password", help="Passing ansible password for the ssh_connection")
+    # grab the arguments from the command line
+    args = parser.parse_args()
+    return args
 
 if __name__ == '__main__':
     rgwallisactive()
+
