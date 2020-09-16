@@ -161,10 +161,10 @@ def star():
 
 def mainparser():
     # create a parser var
-    parser = argparse.ArgumentParser(description='Pass the username and password for paramiko, e.g python3 rgwallhost.py username passowrd')
-    # going to have only positional arguments
-    parser.add_argument("username", help="Passing ansible username for the ssh_connection")
-    parser.add_argument("password", help="Passing ansible password for the ssh_connection")
+    parser = argparse.ArgumentParser(description='Pass the username and password for paramiko')
+    # going to have only positional arguments and optional arguments
+    parser.add_argument("-u", "--username", required=True, help="Passing ansible username for the ssh_connection")
+    parser.add_argument("-p", "--password", required=True, help="Passing ansible password for the ssh_connection")
     # grab the arguments from the command line
     args = parser.parse_args()
     return args
