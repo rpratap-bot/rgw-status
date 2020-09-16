@@ -12,11 +12,10 @@
 1. git clone the repo.
 2. Place at /user/homefolder, for eg uname=cephuser, so place in /home/cephuser/file{1..2}.py
 3. sudo chmod +x rgwallhost.py , sudo chmod +x hostandlog.py
-4. Change the uname and password variable in rgwallhost.py (line 17, 18) to the ansible user uname/password.
-5. python3 rgwallhost.py  or sudo python3 rgwallhost.py (if there is any password issue, try to add/remove sudo from the py file).
-6. After above command gets executed, check a new log file is created with current date in -  ~/2020-09-01.log
-7. cronatb -e //set for the cronjob for every 5 min
-8. x/5 x x x x /usr/bin/python3 /home/user_name/rgwallhost.py
+4. python3 rgwallhost.py ansible_uname ansible_user_password.
+5. After above command gets executed, check a new log file is created with current date in -  ~/2020-09-01.log
+6. cronatb -e //set for the cronjob for every 5 min
+7. x/5 x x x x /usr/bin/python3 /home/user_name/rgwallhost.py
 
 ### Observation
 1. Output file contains the ssh status :: rgw-node-name ::  timestamp of the rgw daemons
