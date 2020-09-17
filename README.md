@@ -19,9 +19,9 @@
 3. Install requirements 
     - pip3 install -r requirements.txt
 4. python3 rgwallhost.py -u ansible_uname -p ansible_user_password.
-5. After above command gets executed, check a new log file is created with current date in -  ~/2020-09-01.log
+5. After above command gets executed, check a new log file is created with current date named as for eg =  ~/2020-09-01.log
 6. cronatb -e //set for the cronjob for every 5 min
-7. x/5 x x x x /usr/bin/python3 /home/user_name/rgwallhost.py
+7. */5 * * * * cd /home/ansible_user/rgw-status && /home/ansible_user/rgw-status/bin/python3 /home/ansible_user/rgw-status/rgwallhost.py -u cephuser -p cephuser
 
 ### Observation
 1. Output file contains the ssh status :: rgw-node-name ::  timestamp of the rgw daemons
