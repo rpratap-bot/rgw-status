@@ -5,6 +5,9 @@ import itertools
 import configparser
 import paramiko
 import argparse
+import yaml
+import smtplib
+from email.message import EmailMessage
 from datetime import datetime
 
 config = configparser.ConfigParser()
@@ -45,6 +48,7 @@ def rgwall(cmd, username, password):
     print(host_list)
     len_host_list = '1'
     len_host_list1 = "150"
+    count_val = []
     daily_log = '{}.log'.format(log_name)
     # ssh to particular host one by one and check the status and job
     logging.getLogger("paramiko").setLevel(logging.WARNING)
@@ -77,10 +81,12 @@ def rgwall(cmd, username, password):
                 count += 1
             else:
                 log_list.append(line.strip('\n'))
+                count_val.append(line.strip('\n'))
                 count += 1
         print(host_list)
         # print(log_list)
         total_rgw_instance = len(log_list)
+        # count_val = log_list
         client.close()
 
         for i in range(total_rgw_instance):
@@ -135,6 +141,71 @@ def rgwall(cmd, username, password):
                 status = "Sleeping"
                 logging.info("JobStatus: {} :: Hostrgw: {}.rgw{}".format(status, host_list[0], i))
             star()
+
+    with open("some_yaml.yml") as f:
+        result = yaml.safe_load(f)
+    date_1 = result["minutes"]
+    d1 = '{} min ago'.format(date_1)
+    d2 = '+\'%Y-%m-%d %T\''
+    completed = subprocess.run(['date', d2, '-d', d1], stdout=subprocess.PIPE, )
+    date_1 = completed.stdout.decode('utf-8').strip(' \' , \n')
+    # print(date_1)
+    # print(type(date_1))
+    # changing to <class 'datetime.datetime'>
+    date_obj_1 = datetime.strptime(date_1, "%Y-%m-%d %H:%M:%S")
+    date_obj_1_date = date_obj_1.date()
+    # print(date_obj_1_date)
+    # print(type(date_obj_1_date))
+    date_obj_1_time = date_obj_1.time()
+    date_obj_1_time_hm = str(date_obj_1_time)[:5]
+    # print(date_obj_1_time_hm)
+    # print(date_obj_1)
+    # print(type(date_obj_1))
+    log_file_check = '{}.log'.format(date_obj_1_date)
+
+    cat_file = subprocess.Popen(['cat', log_file_check], stdout=subprocess.PIPE, )
+    grep_file = subprocess.Popen(['grep', date_obj_1_time_hm], stdin=cat_file.stdout, stdout=subprocess.PIPE)
+    end_of_pipe = grep_file.stdout
+    output_conf = []
+    for line in end_of_pipe:
+        output_conf.append(line.decode('utf-8'))
+    # print(output_conf)
+    f = open('status.txt', 'r')
+    out_line = f.readline()
+    print(out_line)
+    if out_line == 'Email Send':
+        print('Mail has already been send, kindly check you mail id')
+    else:
+        if not output_conf:
+            print("The time has not yet exceed.")
+        else:
+            # f.close()
+            f = open('status.txt', 'a+')
+            f.write('Email Send')
+            f.close()
+            c1 = len(count_val)
+            c2 = str(c1*2)
+            tail_file = subprocess.run(['tail', '-n', c2, log_file_check], stdout=subprocess.PIPE, )
+            op_tail_file = tail_file.stdout.decode('utf-8').strip(' \' , \n')
+            print(op_tail_file)
+            print(type(op_tail_file))
+
+            contacts = result["email"]
+            msg = EmailMessage()
+            msg['Subject'] = 'Test Mail'
+            msg['From'] = 'rgwstatus@gmail.com'
+            # takes around 3 minutes to send the mail
+            msg.set_content(op_tail_file)
+            msg['To'] = contacts
+            # using gmail mail server with port
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                # login
+                smtp.login('rgwstatus@gmail.com', result["password"])
+                # send mail
+                smtp.send_message(msg)
+                smtp.close()
+
+    f.close()
 
 
 def listtoset(list_input):
