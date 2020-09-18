@@ -1,0 +1,6 @@
+---
+email:
+  - email_1@redhat.com
+  - email_2@gmail.com
+minutes: 60 # can be set only in mintues interval, e.g 90, 120, 60
+password: # ask from the admin of the repo
