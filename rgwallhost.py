@@ -136,7 +136,7 @@ def rgwall(cmd, username, password):
             # if all 3 are present, node is in working mode else in ideal state
             if single_date and single_time and single_http_stat:
                 status = "Working"
-                logging.info("JobStatus: {} :: Hostrgw: {}".format(status, host_list[0]))
+                logging.info("JobStatus: {} :: Hostrgw: {}".format(status, host_list[0], i))
             else:
                 status = "Sleeping"
                 logging.info("JobStatus: {} :: Hostrgw: {}.rgw{}".format(status, host_list[0], i))
